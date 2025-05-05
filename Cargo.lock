@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "rust_crud"
+name = "my_crud_project"
 version = "0.1.0"
