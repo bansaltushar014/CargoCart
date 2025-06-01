@@ -22,10 +22,28 @@ fn update_item(_item: &mut Item, _id: u32) {
     _item.id = _id;
 }
 
+fn input_values() -> (u32, String) {
+    let mut index = String::new();
+    println!("Enter the Id: ");
+    io::stdin()
+        .read_line(&mut index)
+        .expect("Failed to read line");
+
+    let _id: u32 = index.trim().parse().expect("Index entered was not a number");
+
+    let mut index = String::new();
+    println!("Enter the Name: ");
+    io::stdin()
+        .read_line(&mut index)
+        .expect("Failed to read line");
+
+    let _name: String = index.trim().to_string();
+
+    return (_id, _name);
+}
+
 fn main() {
-    println!("Testing!");
-    let mut id=0;
-    let mut name: String = String::from("Testing");
+    let (id, name) = input_values();
     let mut item: Item = create_an_item(id, name);
     read_an_item(&mut item);
     update_item(&mut item, 12);
