@@ -1,51 +1,14 @@
-use std::io;
-struct Item {
-    id: u32,
-    name: String,
-}
+mod utils;
+use utils::helper::input_values;
+use utils::lib::Item;
 
-fn create_an_item(_id: u32, _name: String) -> Item {
-    let mut item = Item {
-        id: _id,
-        name: _name,
-    };
-    return item;
-}
-
-// Make it as whole struct could be printed.
-fn read_an_item(item: &mut Item) {
-    println!("Item id: {} , name: {}", item.id, item.name);
-}
-
-// Make it generic that any value can be taken care here.
-fn update_item(_item: &mut Item, _id: u32) {
-    _item.id = _id;
-}
-
-fn input_values() -> (u32, String) {
-    let mut index = String::new();
-    println!("Enter the Id: ");
-    io::stdin()
-        .read_line(&mut index)
-        .expect("Failed to read line");
-
-    let _id: u32 = index.trim().parse().expect("Index entered was not a number");
-
-    let mut index = String::new();
-    println!("Enter the Name: ");
-    io::stdin()
-        .read_line(&mut index)
-        .expect("Failed to read line");
-
-    let _name: String = index.trim().to_string();
-
-    return (_id, _name);
-}
+mod controllers;
+use controllers::crud_operation;
 
 fn main() {
     let (id, name) = input_values();
-    let mut item: Item = create_an_item(id, name);
-    read_an_item(&mut item);
-    update_item(&mut item, 12);
-    read_an_item(&mut item);
+    let mut item: Item = crud_operation::create_an_item(id, name);
+    crud_operation::read_an_item(&mut item);
+    crud_operation::update_item(&mut item, 12);
+    crud_operation::read_an_item(&mut item);
 }
