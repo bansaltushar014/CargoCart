@@ -1,4 +1,4 @@
-use std::io;    
+use std::io;
 
 pub fn input_values() -> (u32, String) {
     let mut index = String::new();
@@ -7,7 +7,10 @@ pub fn input_values() -> (u32, String) {
         .read_line(&mut index)
         .expect("Failed to read line");
 
-    let _id: u32 = index.trim().parse().expect("Index entered was not a number");
+    let _id: u32 = index
+        .trim()
+        .parse()
+        .expect("Index entered was not a number");
 
     let mut index = String::new();
     println!("Enter the Name: ");
