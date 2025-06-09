@@ -22,3 +22,18 @@ pub fn input_values() -> (u32, String) {
 
     return (_id, _name);
 }
+
+pub fn input_id() -> u32 {
+    let mut index = String::new();
+    println!("Enter the Id: ");
+    io::stdin()
+        .read_line(&mut index)
+        .expect("Failed to read line");
+
+    let _id: u32 = index
+        .trim()
+        .parse()
+        .expect("Index entered was not a number");
+
+    return _id;
+}
