@@ -2,12 +2,14 @@ use crate::utils::lib::Item;
 use dotenv::dotenv;
 use native_tls::{Certificate, TlsConnector};
 use postgres_native_tls::MakeTlsConnector;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use tokio_postgres::{Config, Error};
 
-pub async fn connect_database() -> Result<tokio_postgres::Client, Box<dyn std::error::Error>> {
+pub async fn connect_database() -> Result<Arc<Mutex<tokio_postgres::Client>>, Box<dyn std::error::Error>> {
     dotenv().ok(); // Load environment variables from .env file
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     println!("{}", database_url);
@@ -31,7 +33,7 @@ pub async fn connect_database() -> Result<tokio_postgres::Client, Box<dyn std::e
         }
     });
 
-    Ok(client)
+    Ok(Arc::new(Mutex::new(client)))
 }
 
 // async move
@@ -73,10 +75,11 @@ pub async fn insert_data(client: &tokio_postgres::Client, item: &mut Item) -> Re
     Ok(())
 }
 
-pub async fn update_data(client: &tokio_postgres::Client, item: &mut Item) -> Result<(), Error> {
+pub async fn update_data(client: &tokio_postgres::Client, item: &mut Item) -> Result<Option<Item>, Error> {
     let id: i32 = item.id as i32;
     let name: &str = &item.name;
 
+    let mut resItem: Option<Item> = None;
     if check_existance(client, id).await? {
         let query = "UPDATE users SET name = $2 WHERE id = $1";
 
@@ -86,14 +89,15 @@ pub async fn update_data(client: &tokio_postgres::Client, item: &mut Item) -> Re
             .expect("Failed to insert data");
 
         println!("Data inserted: id = {}, name = {}", id, name);
+        resItem = Some(Item {id: item.id, name: item.name.clone()});
     } else {
         println!("Data with id = {} not exists, no update needed.", id);
     }
 
-    Ok(())
+    Ok(resItem)
 }
 
-pub async fn read_data(client: &tokio_postgres::Client, id: i32) -> Result<(), Error> {
+pub async fn read_data(client: &tokio_postgres::Client, id: i32) -> Result<(Option<Item>), Error> {
     println!("Data read against: id = {}", id);
 
     let query = "SELECT * FROM users WHERE id=$1;";
@@ -112,9 +116,11 @@ pub async fn read_data(client: &tokio_postgres::Client, id: i32) -> Result<(), E
         name = Some(row.get(1));
     }
 
+    let mut item: Option<Item> = None;
     match (user_id, name.clone()) {
         (Some(id), Some(name)) => {
             println!("User ID: {}, Name: {}", id, name);
+            item = Some(Item {id: id as u32, name: name});
         }
         _ => {
             println!("No data found.");
@@ -123,5 +129,5 @@ pub async fn read_data(client: &tokio_postgres::Client, id: i32) -> Result<(), E
 
     println!("User ID: {:?}, Name: {:?}", user_id, name);
 
-    Ok(())
+    Ok(item)
 }
